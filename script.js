@@ -47,37 +47,7 @@ if (hamburger && navMenu) {
     navMenu.classList.toggle('active');
   });
 }
-document.getElementById("contactForm").addEventListener("submit", async function (e) {
-  e.preventDefault(); // 🚫 stop redirect
 
-  const form = e.target;
-  const formData = new FormData(form);
-
-  const successMsg = document.getElementById("formSuccess");
-  const errorMsg = document.getElementById("formError");
-
-  successMsg.style.display = "none";
-  errorMsg.style.display = "none";
-
-  try {
-    const response = await fetch("https://formspree.io/f/xeoqwoej", {
-      method: "POST",
-      body: formData,
-      headers: {
-        "Accept": "application/json"
-      }
-    });
-
-    if (response.ok) {
-      successMsg.style.display = "block";
-      form.reset();
-    } else {
-      errorMsg.style.display = "block";
-    }
-  } catch (error) {
-    errorMsg.style.display = "block";
-  }
-});
 /*************************************************
  * STATS COUNTER
  *************************************************/
@@ -274,23 +244,40 @@ const contactForm = document.getElementById('contactForm');
 const formSuccess = document.getElementById('formSuccess');
 
 if (contactForm) {
-  contactForm.addEventListener('submit', (e) => {
-    e.preventDefault();
+  contactForm.addEventListener('submit', async (e) => {
+    e.preventDefault(); // stop redirect
 
     const submitBtn = contactForm.querySelector('.form-submit');
     submitBtn.textContent = 'Sending...';
     submitBtn.disabled = true;
 
-    setTimeout(() => {
-      formSuccess.classList.add('active');
+    // Dynamic email subject from dropdown
+    const inquiry = document.getElementById('subject').value;
+    contactForm.querySelector('input[name="_subject"]').value =
+      `Portfolio Inquiry: ${inquiry}`;
+
+    try {
+      const response = await fetch(contactForm.action, {
+        method: 'POST',
+        body: new FormData(contactForm),
+        headers: { 'Accept': 'application/json' }
+      });
+
+      if (response.ok) {
+        formSuccess.classList.add('active');
+        contactForm.reset();
+
+        setTimeout(() => {
+          formSuccess.classList.remove('active');
+        }, 4000);
+      } else {
+        alert('❌ Failed to send message. Please try again.');
+      }
+    } catch (err) {
+      alert('❌ Network error. Try again later.');
+    } finally {
       submitBtn.textContent = 'Send Message';
       submitBtn.disabled = false;
-      contactForm.reset();
-
-      setTimeout(() => {
-        formSuccess.classList.remove('active');
-      }, 4000);
-    }, 1200);
+    }
   });
 }
-
