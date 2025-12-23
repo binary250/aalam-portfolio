@@ -47,7 +47,37 @@ if (hamburger && navMenu) {
     navMenu.classList.toggle('active');
   });
 }
+document.getElementById("contactForm").addEventListener("submit", async function (e) {
+  e.preventDefault(); // 🚫 stop redirect
 
+  const form = e.target;
+  const formData = new FormData(form);
+
+  const successMsg = document.getElementById("formSuccess");
+  const errorMsg = document.getElementById("formError");
+
+  successMsg.style.display = "none";
+  errorMsg.style.display = "none";
+
+  try {
+    const response = await fetch("https://formspree.io/f/xeoqwoej", {
+      method: "POST",
+      body: formData,
+      headers: {
+        "Accept": "application/json"
+      }
+    });
+
+    if (response.ok) {
+      successMsg.style.display = "block";
+      form.reset();
+    } else {
+      errorMsg.style.display = "block";
+    }
+  } catch (error) {
+    errorMsg.style.display = "block";
+  }
+});
 /*************************************************
  * STATS COUNTER
  *************************************************/
@@ -263,3 +293,4 @@ if (contactForm) {
     }, 1200);
   });
 }
+
